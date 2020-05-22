@@ -427,6 +427,7 @@ class WAccountCollection extends WCollection {
         ],
         handler: (context, response) {
           context.api.authToken = response.data.token;
+          context.api.accountId = response.data.id;
         }
       )
     );

@@ -1,6 +1,4 @@
-> :warning: **Not production ready**: Wormhole is currently a concept library with uncertain future. 
-
-# wormhole
+> :warning: **Not production ready**: Wormhole is currently a concept library with uncertain future. API changes rapidly. Stability is not guaranteed. 
 
 ![Wormhole Logo](assets/logo.png)
 
@@ -135,6 +133,8 @@ dependencies:
 
 Also, please don't forget to use these dependencies with any of the below examples.
 
+
+
 # How it works
 
 Although you can customize endpoint URIs, HTTP methods, access conditions or event the way data is handled, by default Wormhole expects your API to be in the following format.
@@ -151,11 +151,12 @@ https://YourRestService/v1/posts
 
 By default, Wormhole assumes the following endpoints are available for a collection:
 
-- `GET https://YourRestService/v1/posts` responds with a complete list of posts.
-- `GET https://YourRestService/v1/posts/mine` responds with a list of posts created by the currently logged in user.
-- `POST https://YourRestService/v1/posts` creates a new post.
-- `PUT https://YourRestService/v1/posts/<id>` edits an existing post.
-- `DELETE https://YourRestService/v1/posts/<id>` deletes an existing post.
+- `GET https://YourRestService/v1/posts` responds with a complete list of posts. (`list` operation)
+- `GET https://YourRestService/v1/posts/<id>` responds with a single post. (`read` operation)
+- `GET https://YourRestService/v1/posts/mine` responds with a list of posts created by the currently logged in user. (`mine` operation)
+- `POST https://YourRestService/v1/posts` creates a new post. (`create` operation)
+- `PUT https://YourRestService/v1/posts/<id>` edits an existing post. (`update` operation)
+- `DELETE https://YourRestService/v1/posts/<id>` deletes an existing post. (`delete` operation)
 
 In Wormhole, the definition of such a protocol would look like this (`lib/protocol.dart`):
 ```dart
@@ -299,3 +300,169 @@ class PostsScreen extends StatelessWidget {
   }
 }
 ```
+
+
+
+# Protocol definition
+
+All the code in this section does not provide any pratical functionality to your app. It only tells Wormhole how to behave and also how the API services you are using should behave.
+
+Once you define your protocols, Wormhole does the rest of the job with very little of further attention.
+
+You can also use the protocol definition for server side development.
+
+## Disable a collection operation
+
+```dart
+// Define that deletion of a post is not available
+Wormhole()['main']['posts'].disable('delete');
+```
+
+`disable()` accepts a `String` representing any of the operations available on each collection: `list`, `read`, `mine`, `create`, `update`, `delete`.
+
+## Define a required endpoint parameter / argument
+
+## Restrict a collection operation to a user role
+
+```dart
+// Define that deletion of a post is only available to user with the `admin` role
+Wormhole()['main']['posts'].override('delete').roles = ['admin'];
+```
+
+`override()` accepts a `String` representing any of the operations available on each collection: `list`, `read`, `mine`, `create`, `update`, `delete`.
+
+## Change the HTTP method of an endpoint
+```dart
+// Define that editing a post should be requested with the HTTP `POST`
+// method instead of the default `PUT`
+Wormhole()['main']['posts'].override('update').method = WHttpMethod.POST;
+```
+
+`override()` accepts a `String` representing any of the operations available on each collection: `list`, `read`, `mine`, `create`, `update`, `delete`.
+
+## Add a custom endpoint to a collection
+
+## Define a special collection: user accounts
+
+There's a special type of collection for user accounts with additional features: `WAccountCollection`
+
+```dart
+Wormhole()['main']['users'] = WAccountCollection(
+  comment: 'User accounts.',
+  fields: [
+    // In a `WAccountCollection`, the `WID` and `WAccountId`
+    // field values are always identical.
+    WID<int>('id'), // always required
+    WAccountId<int>('user_id'), // always required
+    WField<String>('name'), // optional example
+    WField<String>('banned'), // optional example
+    WField<String>('lang'), // optional example
+    WField<List>('roles'), // always required
+    // created is the user's registration date
+    WCreated<int>('created', comment: 'Creation timestamp (seconds).'),
+  ],
+  // This will be used for the current user on application startup,
+  // before the user logs in
+  defaultData: [
+    {
+      'roles': [],
+      'lang': 'en',
+    }
+  ]
+);
+
+//
+// Customization
+//
+
+// get collection reference
+WCollection users = Wormhole()['main']['users'];
+
+// only admins will be able to list all users
+users.override('list').roles = ['admin'];
+
+// reading a single user will require the `id` parameter
+users.override('read').args = [ WArg<WField, String>('id', require: true) ];
+// reading a single user will require the `admin` role
+users.override('read').roles = ['admin'];
+
+// reading a single user will require the `id` parameter
+users.override('update').args = [ WArg<WField, String>('id', require: true) ];
+// modifying a single user will require the `admin` role
+users.override('update').roles = ['admin'];
+// special condition your server dev should implement:
+users.override('update').comment += ' The admin role is required only if the request is attempting to update an account other than the user\'s own.';
+
+// deleting a single user will require the `id` parameter
+users.override('delete').args = [ WArg<WField, String>('id', require: true) ];
+// deleting a single user will require the `admin` role
+users.override('delete').roles = ['admin'];
+// special condition your server dev should implement:
+users.override('delete').comment += ' The admin role is required only if the request is attempting to delete an account other than the user\'s own.';
+// (if you wish so, normally it is never a good idea to completely
+// delete user accounts and setting `banned` to a positive value
+// is recommended instead)
+```
+
+## Apply user's authentication data in Wormhole
+
+`WAccountCollection` comes with a special operation `sign-in`, which happens upon user's log in / sign in.
+
+```dart
+Wormhole()['main']['users'] = WAccountCollection( /* ... */ );
+
+WCollection users = Wormhole()['main']['users'];
+
+users.override('sign-in').handler = (context, response) {
+  // Here we are passing the user's Id and auth token to Wormhole
+  context.api.authToken = response.data.token;
+  context.api.accountId = response.data.id;
+};
+```
+
+The value of `context.api.authToken` is then sent with every request to the given service API as the authorization HTTP header: `Authorization: Bearer <value>`
+
+## Apply protocol definitions
+
+When you are done defining your API protocols, simply call `Wormhole().setup();` after all the definition lines.
+
+## Comment an endpoint
+
+## Comment a collection
+
+## Comment a field
+
+The parameters `comment`, `regex` and `example` are available to better specify what values are expected in a parameter, for example:
+
+```dart
+WField<int>('risk', 
+  comment: 'Indicator of risk on a scale 1-3. 1=Verified, 2=Similar to verified, 3=Experimental',
+  regex: '^[1-3]\$',
+  example: 1,
+)
+```
+
+# Using Wormhole
+
+## Periodically refresh a collection's data
+
+When defining collections, use the `refreshInterval` parameter. Wormhole will automatically pull data once per specified interval in seconds.
+
+```dart
+WCollection(
+  refreshInterval: 3600, // seconds
+  // ...
+)
+```
+
+## Users: Log in / Sign in
+
+## Users: Initiate password recovery
+
+## Users: Recover password
+
+## Develop your app before the server side is ready
+
+## Export API reference
+
+## Export protocol definition in JSON
