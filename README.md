@@ -19,6 +19,7 @@ Just define the protocol and enjoy:
 - Working simultaneously with multiple REST API services.
 - Server-less development with example data.
 - API reference export to HTML or JSON for your server side dev.
+- Offline apps with local data cache.
 
 
 # Intro sample
@@ -28,7 +29,7 @@ Imagine you want to display a list of all countries of the world in your app. We
 ```json
 [
   {
-    name: "Country name",
+    "name": "Country name",
   },
 ]
 ```
