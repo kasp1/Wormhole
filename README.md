@@ -2,12 +2,13 @@
 
 ![Wormhole Logo](assets/logo.png)
 
+[<img src="assets/become-a-patron-button-1.png" width="200">](https://www.patreon.com/bePatron?u=5743048)
 
-[![Become a Patron](https://images.squarespace-cdn.com/content/v1/5abe518d2487fde545354605/1574446847857-SEPS10LKL90YF9BNUYDU/ke17ZwdGBToddI8pDm48kEb2purk_Q97xtB4o0QtvVxZw-zPPgdn4jUwVcJE1ZvWQUxwkmyExglNqGp0IvTJZUJFbgE-7XRK3dMEBRBhUpyvzbbd1l1r83yZkZyJQ_TDY2ozdEw73hlBxC-gn7wSS7iT6hcQOsajzyjTFPb7QVo/become-a-patron-button-1.png | width=200)](https://www.patreon.com/bePatron?u=5743048)
+http://flutter-wormhole.tk/become-a-patron-button-1.png
 
-Client/server transport layer.
+REST API data replication layer.
 
-Wormhole loads data from any REST API service into your app and synchronizes data changes made in your app back to the REST API service. All automatic and controlled.
+Wormhole loads data from any REST API service into your app and synchronizes data changes made in your app back to the REST API service. All automatic and customizable.
 
 Just define the protocol and enjoy:
 - Automatic data retrieval on demand.
@@ -162,7 +163,7 @@ By default, Wormhole assumes the following endpoints are available for a collect
 - `DELETE https://YourRestService/v1/posts/<id>` deletes an existing post. (`delete` operation)
 
 In Wormhole, the definition of such a protocol would look like this (`lib/protocol.dart`):
-```dartk@€
+```dart
 import 'dart:core';
 import 'package:wormhole/wormhole.dart';
 
@@ -313,6 +314,33 @@ All the code in this section does not provide any pratical functionality to your
 Once you define your protocols, Wormhole does the rest of the job with very little of further attention.
 
 You can also use the protocol definition for server side development.
+
+## Define a REST API service
+
+```dart
+Wormhole()['main'] = WRestApi(
+  base: 'https://YourRestService/v1/',
+);
+
+// Collection definitions here
+
+Wormhole().setup();
+```
+
+## Define a simple collection
+
+```dart
+Wormhole()['main']['posts'] = WCollection(
+  comment: 'User posts.',
+  fields: [
+    WID<int>('id'),
+    WField<String>('content'),
+    WCreated<int>('created', comment: 'Creation timestamp (seconds).'),
+    WCreated<int>('updated', comment: 'Last update timestamp (seconds).'),
+  ],
+);
+```
+
 
 ## Disable a collection operation
 
