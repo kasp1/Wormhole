@@ -48,11 +48,11 @@ class Wormhole {
     return this.apis[name];
   }
 
-  toHtml() {
-    return WHtmlGenerator().generate();
+  toHtml({ String api }) {
+    return WHtmlGenerator().generate(api: api);
   }
 
-  toJson({String api}) {
+  toJson({ String api }) {
     return WJsonGenerator().generate(api: api);
   }
   

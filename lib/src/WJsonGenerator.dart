@@ -6,7 +6,7 @@ import 'Exceptions.dart';
 import 'fields.dart';
 
 class WJsonGenerator extends WGenerator {
-  String generate({String api}) {
+  String generate({ String api }) {
     Map output = {};
 
     if (api != null) {

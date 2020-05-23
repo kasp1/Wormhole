@@ -465,4 +465,74 @@ WCollection(
 
 ## Export API reference
 
+Assuming you have a `lib/protocol.dart` file containing the protocol defintions:
+
+```dart
+import 'dart:core';
+import 'package:wormhole/wormhole.dart';
+
+setupProtocols() {
+  Wormhole()['main'] = WRestApi(
+    base: 'https://YourService/v1/',
+  );
+
+  // ... collections ...
+
+  Wormhole().setup();
+} 
+```
+
+Create a new file called e.g. `lib/protocol2html.dart` with the following code:
+
+```dart
+import 'dart:io';
+import 'package:wormhole/wormhole.dart';
+import 'protocol.dart';
+
+void main() {
+  setupProtocols();
+  File('api-reference.html').writeAsString(
+    Wormhole().toHtml();
+  );
+}
+```
+
+Now you everytime you run this script from command line (`dart lib/protocol2html.dart`), a new file called `api-reference.html` will be generated containing the description of your APIs defined in `setupProtocols()`.
+
 ## Export protocol definition in JSON
+
+Assuming you have a `lib/protocol.dart` file containing the protocol defintions:
+
+```dart
+import 'dart:core';
+import 'package:wormhole/wormhole.dart';
+
+setupProtocols() {
+  Wormhole()['main'] = WRestApi(
+    base: 'https://YourService/v1/',
+  );
+
+  // ... collections ...
+
+  Wormhole().setup();
+} 
+```
+
+Create a new file called e.g. `lib/protocol2json.dart` with the following code:
+
+```dart
+import 'dart:io';
+import 'package:wormhole/wormhole.dart';
+import 'protocol.dart';
+
+void main() {
+  setupProtocols();
+  File('protocol-main.json').writeAsString(
+    Wormhole().toJson(api: 'main');
+  );
+}
+```
+
+The `api` argument of `Wormhole().toJson()` states which particular API should be exported in JSON and is optional. If no `api` is specified, the entire definition will be exported.
+
+Now you everytime you run this script from command line (`dart lib/protocol2json.dart`), a new file called `protocol-main.json` will be generated containing the description of your `main` API defined in `setupProtocols()`.
