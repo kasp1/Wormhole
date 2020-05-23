@@ -4,9 +4,7 @@
 
 [<img src="assets/become-a-patron-button-1.png" width="200">](https://www.patreon.com/bePatron?u=5743048)
 
-http://flutter-wormhole.tk/become-a-patron-button-1.png
-
-REST API data replication layer.
+**REST API data replication layer.**
 
 Wormhole loads data from any REST API service into your app and synchronizes data changes made in your app back to the REST API service. All automatic and customizable.
 
@@ -457,7 +455,19 @@ The value of `context.api.authToken` is then sent with every request to the give
 
 When you are done defining your API protocols, simply call `Wormhole().setup();` after all the definition lines.
 
-## Comment an endpoint
+## Comment an endpoint / operation
+
+To change an operation's / endpoint's comment, use the `comment` property:
+
+```dart
+Wormhole()['apiName']['collectionName'].override('create').comment = 'Your comment.';
+```
+
+You can also add to the default comments, for example:
+
+```dart
+users.override('update').comment += ' The admin role is required only if the request is attempting to update an account other than the currently logged user\'s own.';
+```
 
 ## Comment a collection
 
