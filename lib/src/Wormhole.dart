@@ -49,7 +49,7 @@ class Wormhole {
   }
 
   toHtml({ String api }) {
-    return WHtmlGenerator().generate(api: api);
+    return WHtmlGenerator().generate();
   }
 
   toJson({ String api }) {

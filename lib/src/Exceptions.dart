@@ -52,3 +52,12 @@ class WUndefinedApiException implements Exception {
   @override
   String toString() => 'No api \'$api\' has been specified.';
 }
+
+class WUndefinedFieldException implements Exception {
+  String api, collection, field;
+
+  WUndefinedFieldException(this.api, this.collection, this.field);
+
+  @override
+  String toString() => 'Wormhole()[\'$api\'][\'$collection\'].create(), .add() or update() was called with an undefined field `$field` in the proposed record. Please check whether your record field names match your collection defintion of fields.';
+}

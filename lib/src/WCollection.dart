@@ -179,21 +179,25 @@ class WCollection {
 
     this._data = [];
 
-    List<dynamic> data = await endpoint('list').perform();
-    
-    data.forEach((item) {
-      Map record = {};
+    try {
+      List<dynamic> data = await endpoint('list').perform();
+      
+      data.forEach((item) {
+        Map record = {};
 
-      if (item is Map) {
-        this.fields.forEach((field) {
-          if (item.containsKey(field.name)) {
-            record[field.name] = item[field.name];
-          }
-        });
+        if (item is Map) {
+          this.fields.forEach((field) {
+            if (item.containsKey(field.name)) {
+              record[field.name] = item[field.name];
+            }
+          });
 
-        _data.add(record);
-      }
-    });
+          _data.add(record);
+        }
+      });
+    } catch (e) {
+
+    }
 
     isLoading = false;
 
@@ -269,6 +273,10 @@ class WCollection {
     return _data;
   }
 
+  add(Map record) {
+    this.create(record);
+  }
+
   List<Map> find(Map<String, dynamic> conditions) {
 
     // conditions validity check
@@ -334,11 +342,37 @@ class WCollection {
     
     return list;
   }
+
+  checkRecordKeyMatchFields(Map record) {
+    record.forEach((key, value) {
+      bool found = false;
+      fields.forEach((WField field) {
+        if (!found) {
+          if (field.name == key.toString()) {
+            found = true;
+          }
+        }
+      });
+
+      if (!found) {
+        throw WUndefinedFieldException(api.name, name, key.toString());
+      }
+    });
+  }
   
   Future create(Map record) async {
+    _data.add(record);
+
     if (_endpoints['create'] == null)
       throw WUndefinedEndpointException(api.name, name, 'create');
-    // ...
+    
+    this.checkRecordKeyMatchFields(record);
+    
+    try {
+      _endpoints['create'].perform();
+    } catch (e) {
+
+    }
 
     notifyListeners();
   }

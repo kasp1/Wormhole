@@ -2,6 +2,9 @@
 
 ![Wormhole Logo](assets/logo.png)
 
+
+[![Become a Patron](https://images.squarespace-cdn.com/content/v1/5abe518d2487fde545354605/1574446847857-SEPS10LKL90YF9BNUYDU/ke17ZwdGBToddI8pDm48kEb2purk_Q97xtB4o0QtvVxZw-zPPgdn4jUwVcJE1ZvWQUxwkmyExglNqGp0IvTJZUJFbgE-7XRK3dMEBRBhUpyvzbbd1l1r83yZkZyJQ_TDY2ozdEw73hlBxC-gn7wSS7iT6hcQOsajzyjTFPb7QVo/become-a-patron-button-1.png | width=200)](https://www.patreon.com/bePatron?u=5743048)
+
 Client/server transport layer.
 
 Wormhole loads data from any REST API service into your app and synchronizes data changes made in your app back to the REST API service. All automatic and controlled.
@@ -159,7 +162,7 @@ By default, Wormhole assumes the following endpoints are available for a collect
 - `DELETE https://YourRestService/v1/posts/<id>` deletes an existing post. (`delete` operation)
 
 In Wormhole, the definition of such a protocol would look like this (`lib/protocol.dart`):
-```dart
+```dartk@€
 import 'dart:core';
 import 'package:wormhole/wormhole.dart';
 
@@ -462,6 +465,40 @@ WCollection(
 ## Users: Recover password
 
 ## Develop your app before the server side is ready
+
+You've been there. You are about to pull a new project and you would like to start building the UI, but that's not easy without having a working server side to give you some data to display.
+
+And it will take you (or the other dev) at least a few days to get the server side to a usable state.
+
+No worries, just add `defaultData` to any of your collections. Wormhole will still try to load data from the specified API address, but will fall back to `defaultData` if unsuccessful.
+
+Example:
+
+```dart
+Wormhole()['main']['messages'] = WCollection(
+  comment: 'Chat messages.',
+  fields: [
+    WID<String>('id'),
+    WField<String>('author'),
+    WField<String>('content'),
+    WCreated<int>('created', comment: 'Creation timestamp (seconds).'),
+  ],
+  defaultData: [
+    {
+      'id': '1',
+      'author': 'Mirek',
+      'content': "Hi Mirek, how are you?",
+      'created': 1570036911
+    },
+    {
+      'id': '2',
+      'author': 'Mirek',
+      'content': "Thanks for asking Mirek, I'm great.",
+      'created': 1570036912
+    },
+  ]
+);
+```
 
 ## Export API reference
 
